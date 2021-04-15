@@ -43,13 +43,30 @@ const commentController = {
       .catch(err => res.json(err));
   },
 
-  getAllComment(req, res) {
-    Comment.find({})
+  addReply({ params, body }, res) {
+    Comment.findOneAndUpdate(
+      { _id: params.commentId },
+      { $push: { replies: body } },
+      { new: true }
+    )
+    .then(data => {
+      if (!data) {
+        res.status(404).json({ message: 'No pizza found with this id.' })
+        return;
+      }
+      res.json(data);
+    })
+    .catch(err => res.json(err));
+  },
+
+  removeReply({ params }, res) {
+    Comment.findOneAndUpdate(
+      { _id: params.commentId },
+      { $pull: { replies: { replyId: params.replyId } } },
+      { new: true }
+    )
       .then(data => res.json(data))
-      .catch(err => {
-        console.log(err);
-        res.status(400).json(err);
-      });
+      .catch(err => res.json(err));
   }
 };
 
